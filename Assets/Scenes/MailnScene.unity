@@ -3458,14 +3458,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CurrentScreen: 4
-  Diamonds: 0
-  Energy: 0
-  GamePrice: 0
   CurrentRoundResult: 
   GameResult: 0
-  GameResultEnergy: 0
-  GameResultDiamonds: 0
-  PlayerName: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+  PlayerName: 5GYyqgLd4qTqRzc3crZNqxrZnwBroGeUvob3t73CQXixPydQ
   CanvasStartScreen: {fileID: 1744272158}
   CanvasScore: {fileID: 1934659635}
   CanvasRulesScreen: {fileID: 414746814}
@@ -3473,6 +3468,13 @@ MonoBehaviour:
   CanvasRoundScore: {fileID: 2088120779}
   CanvasRound: {fileID: 10663659}
   CanvasResult: {fileID: 1137478792}
+  GameAddress: 5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty
+  FbFaEnergyId: 2
+  FbFaDiamondsId: 3
+  FbNfaBetClassId: 2
+  IsLoggedIn: 0
+  UserEmail: testdave@finalbiome.net
+  UserPassword: testDave@finalbiome.net
 --- !u!4 &1030690755
 Transform:
   m_ObjectHideFlags: 0
@@ -4660,6 +4662,7 @@ GameObject:
   - component: {fileID: 1744272158}
   - component: {fileID: 1744272157}
   - component: {fileID: 1744272156}
+  - component: {fileID: 1744272160}
   m_Layer: 5
   m_Name: Canvas Start Screen
   m_TagString: Untagged
@@ -4750,6 +4753,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1744272160
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1744272155}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 212abf69b779040c0b290a86352f1f7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PlayButton: {fileID: 384891678}
 --- !u!1 &1761153749
 GameObject:
   m_ObjectHideFlags: 0
