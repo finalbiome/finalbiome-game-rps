@@ -102,8 +102,6 @@ public class GameManager : MonoBehaviour
     {
         // get instance of the FinalBiome manager
         fbManager = await FinalBiomeManager.GetInstance();
-        // listen changes of the mechanics
-        fbManager.Client.Mx.MechanicsChanged += MxInstanceChangedHandler;
         // listen changes of Fa
         fbManager.Client.Fa.FaBalanceChanged += FaBalanceChangedHandler;
         // listen changes of Nfa
@@ -315,6 +313,9 @@ public class GameManager : MonoBehaviour
         Debug.Log($"User logged in: {loggedIn}");
         if (loggedIn)
         {
+            // start listen changes of the mechanics
+            fbManager.Client.Mx.MechanicsChanged += MxInstanceChangedHandler;
+
             PlayerName = fbManager.Client.Auth.UserInfo.DisplayName ?? fbManager.Client.Auth.UserInfo.Email;
 
             // we need to onboard of the gamer
@@ -357,25 +358,32 @@ public class GameManager : MonoBehaviour
     /// <param name="e"></param>
     void MxInstanceChangedHandler(object o, MechanicsChangedEventArgs e)
     {
+        Debug.Log("MxInstanceChangedHandler");
+#region Usage Option
         if (e.Details is not null)
         {
+            // You can also listen changes of mechnics here, not only as a result executing specific mechanics.
             // look at Bet mechanics changes.
-            if (e.Details.Data.Value == FinalBiome.Api.Types.PalletMechanics.Types.InnerMechanicData.Bet)
-            {
-                currentBetMechanic = e.Id;
+            // if (e.Details.Data.Value == FinalBiome.Api.Types.PalletMechanics.Types.InnerMechanicData.Bet)
+            // {
+            //     currentBetMechanic = e.Id;
 
-                var mechanicsData = e.Details.Data.Value2 as FinalBiome.Api.Types.PalletMechanics.Types.MechanicDataBet;
-                var outcomeIds = mechanicsData.Outcomes.Value;
+            //     var mechanicsData = e.Details.Data.Value2 as FinalBiome.Api.Types.PalletMechanics.Types.MechanicDataBet;
+            //     var outcomeIds = mechanicsData.Outcomes.Value;
 
-                CurrentRoundResult = OutcomesToRoundResult(outcomeIds.Select(o => (uint)o).ToList());
-            }
+            //     CurrentRoundResult = OutcomesToRoundResult(outcomeIds.Select(o => (uint)o).ToList());
+            // }
         }
         else
         {
             // mechanic was finished and dropped
-            if (e.Id.nonce == currentBetMechanic.Value.nonce)
-                currentBetMechanic = null;
+            // if (e.Id.nonce == currentBetMechanic.Value.nonce)
+            // {
+            //     currentBetMechanic = null;
+            //     faNfaBetInstanceId = null;
+            // }
         }
+#endregion
     }
 
     /// <summary>
