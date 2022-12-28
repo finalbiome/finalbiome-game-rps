@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3019356481346307732}
   - component: {fileID: 5414001272661609070}
   m_Layer: 0
-  m_Name: hand-1
+  m_Name: hand-paper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
