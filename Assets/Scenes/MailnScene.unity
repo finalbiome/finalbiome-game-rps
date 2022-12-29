@@ -3679,6 +3679,7 @@ MonoBehaviour:
   FbFaEnergyId: 2
   FbFaDiamondsId: 3
   FbNfaBetClassId: 2
+  ResultDelay: 2300
   IsLoggedIn: 0
   UserEmail: testdave@finalbiome.net
   UserPassword: testDave@finalbiome.net
@@ -6115,6 +6116,7 @@ MonoBehaviour:
   - {fileID: 1961453134}
   - {fileID: 664963981}
   - {fileID: 1939368919}
+  BackButton: {fileID: 1557362689}
 --- !u!1 &2103878478
 GameObject:
   m_ObjectHideFlags: 0
@@ -6167,8 +6169,7 @@ MonoBehaviour:
   Turn: {fileID: 1467792376}
   ResultPlayer: {fileID: 1158560374}
   ResultEnemy: {fileID: 600697436}
-  SelectedHand: 0
-  RoundResult: 0
+  roundResult: 0
   currentScreen: 0
 --- !u!1 &2107154271
 GameObject:
