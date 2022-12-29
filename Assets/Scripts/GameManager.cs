@@ -61,6 +61,10 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public string GameAddress;
     /// <summary>
+    /// Endpoint of FinalBiome Network
+    /// </summary>
+    public string Endpoint = "ws://127.0.0.1:9944";
+    /// <summary>
     /// Id of the fungible asset Energy
     /// </summary>
     public uint FbFaEnergyId;
@@ -76,7 +80,13 @@ public class GameManager : MonoBehaviour
     public MxId? currentBetMechanic;
     public uint? faNfaBetInstanceId;
 
+    public int ResultDelay;
+
     public bool IsLoggedIn;
+
+    private bool hasFirstTurn;
+
+    public Hand? LastSelectedHand;
 
     /// <summary>
     /// Temp hardcoded username
@@ -101,23 +111,33 @@ public class GameManager : MonoBehaviour
     internal async void Start()
     {
         // get instance of the FinalBiome manager
+        ClientConfig config = new(GameAddress, Endpoint);
+        
         fbManager = await FinalBiomeManager.GetInstance();
+        await FinalBiomeManager.Initialize(config);
+
+        Debug.Log($"fbManager.Client :{fbManager.Client is not null}");
+        Debug.Log($"fbManager.Client.Auth :{fbManager.Client.Auth is not null}");
+
+        // listen user state changes
+        fbManager.Client.Auth.StateChanged += UserStateChangedHandler;
         // listen changes of Fa
         fbManager.Client.Fa.FaBalanceChanged += FaBalanceChangedHandler;
         // listen changes of Nfa
         fbManager.Client.Nfa.NfaInstanceChanged += NfaInstanceChangedHandler;
-        // listen user state changes
-        fbManager.Client.Auth.StateChanged += UserStateChangedHandler;
+        // start listen changes of the mechanics
+        fbManager.Client.Mx.MechanicsChanged += MxInstanceChangedHandler;
 
         // sign in with hardcoded credentials
-        await fbManager.Client.Auth.SignInWithEmailAndPassword(UserEmail, UserPassword);
-
-        InitGamePrice();
-        InitBalances();
+        if (!await fbManager.Client.Auth.IsLoggedIn())
+        {
+            Debug.Log("Sign In");
+            await fbManager.Client.Auth.SignInWithEmailAndPassword(UserEmail, UserPassword);
+        }
     }
 
     // Update is called once per frame
-    void Update()
+    internal void Update()
     {
         SetScreen(CurrentScreen);
     }
@@ -131,6 +151,7 @@ public class GameManager : MonoBehaviour
         CurrentRoundResult = new();
         GameResult = GameResult.Undefined;
         IsLoggedIn = false;
+        LastSelectedHand = null;
     }
 
     /// <summary>
@@ -139,8 +160,6 @@ public class GameManager : MonoBehaviour
     /// <param name="screen"></param>
     public void SetScreen(Screens screen)
     {
-        // if (screen == CurrentScreen) return;
-
         switch (screen)
         {
             case Screens.Start:
@@ -198,8 +217,7 @@ public class GameManager : MonoBehaviour
                 CanvasResult.gameObject.SetActive(true);
                 break;
             default:
-                Debug.Log("Not implemented");
-                break;
+                throw new System.Exception($"Unknown Screen: {screen}");
         }
 
     }
@@ -209,6 +227,7 @@ public class GameManager : MonoBehaviour
         // When we returns from game result screeg, we just going to stant screen
         CurrentScreen = Screens.Start;
         CurrentRoundResult.Clear();
+        LastSelectedHand = null;
     }
 
     public void OnClickNextRound()
@@ -250,12 +269,18 @@ public class GameManager : MonoBehaviour
     /// <param name="hand"></param>
     async Task SetSelectedHand(Hand hand)
     {
+        hasFirstTurn = true;
+
+        LastSelectedHand = hand;
         // going to round screen
         CurrentScreen = Screens.Round;
         // send command to the FinalBiome
-        var results = await MakeTurn();
-        // delay showing results
-        await Task.Delay(3_000);
+        var makeTurn = MakeTurn();
+        // but delay showing results
+        var delayResult = Task.Delay(ResultDelay);
+        await Task.WhenAll(makeTurn, delayResult);
+        var results = await makeTurn;
+
         CurrentRoundResult = results;
        
         // go to the round result screen or to the game result screen
@@ -285,7 +310,8 @@ public class GameManager : MonoBehaviour
     /// <param name="e"></param>
     void FaBalanceChangedHandler(object o, FaBalanceChangedEventArgs e)
     {
-        InitBalances();
+        if (e.Id == FbFaEnergyId) Energy = e.Balance;
+        else if (e.Id == FbFaDiamondsId) Diamonds = e.Balance;
     }
 
     /// <summary>
@@ -311,12 +337,14 @@ public class GameManager : MonoBehaviour
     async Task UserStateChangedHandler(bool loggedIn)
     {
         Debug.Log($"User logged in: {loggedIn}");
+
         if (loggedIn)
         {
-            // start listen changes of the mechanics
-            fbManager.Client.Mx.MechanicsChanged += MxInstanceChangedHandler;
-
             PlayerName = fbManager.Client.Auth.UserInfo.DisplayName ?? fbManager.Client.Auth.UserInfo.Email;
+        Debug.Log($"PlayerName: {PlayerName}");
+
+            await InitGamePrice();
+            InitBalances();
 
             // we need to onboard of the gamer
             if (!(bool)fbManager.Client.Game.IsOnboarded)
@@ -332,7 +360,7 @@ public class GameManager : MonoBehaviour
     /// Get price of the Bet NFA and set in in the game manager
     /// </summary>
     /// <returns></returns>
-    async void InitGamePrice()
+    async Task InitGamePrice()
     {
         // we know that price of the bet nfa store in the Perchased characteristic of the Bet class.
         // so, get the class details
@@ -347,8 +375,8 @@ public class GameManager : MonoBehaviour
     /// <returns></returns>
     void InitBalances()
     {
-        Energy = fbManager.FaBalances.GetValueOrDefault(FbFaEnergyId, 0);
-        Diamonds = fbManager.FaBalances.GetValueOrDefault(FbFaDiamondsId, 0);
+        Energy = fbManager.Client.Fa.Balances.GetValueOrDefault(FbFaEnergyId, 0);
+        Diamonds = fbManager.Client.Fa.Balances.GetValueOrDefault(FbFaDiamondsId, 0);
     }
 
     /// <summary>
@@ -359,31 +387,36 @@ public class GameManager : MonoBehaviour
     void MxInstanceChangedHandler(object o, MechanicsChangedEventArgs e)
     {
         Debug.Log("MxInstanceChangedHandler");
-#region Usage Option
+
         if (e.Details is not null)
         {
             // You can also listen changes of mechnics here, not only as a result executing specific mechanics.
             // look at Bet mechanics changes.
-            // if (e.Details.Data.Value == FinalBiome.Api.Types.PalletMechanics.Types.InnerMechanicData.Bet)
-            // {
-            //     currentBetMechanic = e.Id;
+            if (e.Details.Data.Value == FinalBiome.Api.Types.PalletMechanics.Types.InnerMechanicData.Bet)
+            {
+                currentBetMechanic = e.Id;
 
-            //     var mechanicsData = e.Details.Data.Value2 as FinalBiome.Api.Types.PalletMechanics.Types.MechanicDataBet;
-            //     var outcomeIds = mechanicsData.Outcomes.Value;
-
-            //     CurrentRoundResult = OutcomesToRoundResult(outcomeIds.Select(o => (uint)o).ToList());
-            // }
+                if (!hasFirstTurn)
+                {
+                    // we are here if we had an active mechanics and there was no turn.
+                    // i.e. the game is just starting and the user has an active mechanic that will be used as the current one in this round
+                    // in other cases, we do not use the result from here, because we do not need to show the result to the player in advance
+                    var mechanicsData = e.Details.Data.Value2 as FinalBiome.Api.Types.PalletMechanics.Types.MechanicDataBet;
+                    var outcomeIds = mechanicsData.Outcomes.Value;
+                    CurrentRoundResult = OutcomesToRoundResult(outcomeIds.Select(o => (uint)o).ToList());
+                }
+            }
         }
         else
         {
             // mechanic was finished and dropped
-            // if (e.Id.nonce == currentBetMechanic.Value.nonce)
-            // {
-            //     currentBetMechanic = null;
-            //     faNfaBetInstanceId = null;
-            // }
+            if (e.Id.nonce == currentBetMechanic.Value.nonce)
+            {
+                currentBetMechanic = null;
+                faNfaBetInstanceId = null;
+            }
         }
-#endregion
+
     }
 
     /// <summary>
@@ -415,6 +448,7 @@ public class GameManager : MonoBehaviour
             var res = await fbManager.Client.Mx.ExecBuyNfa(FbNfaBetClassId, 0);
             faNfaBetInstanceId = res.Result.InstanceId;
             CurrentRoundResult.Clear();
+            LastSelectedHand = null;
         }
     }
 

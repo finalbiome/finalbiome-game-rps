@@ -13,9 +13,14 @@ public class RoundScore : MonoBehaviour
     public List<Image> gamerScoreUIImages;
     public List<Image> enemyScoreUIImages;
 
+    public Button BackButton;
+
     internal void Update()
     {
         var roundResults = GameManager.Instance.CurrentRoundResult;
+
+        BackButton.interactable = GameManager.Instance.CurrentScreen != Screens.Round;
+
         for (int i = 0; i < 5; i++)
         {
             if (roundResults.Count > i)
