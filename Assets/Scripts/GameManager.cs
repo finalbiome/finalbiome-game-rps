@@ -80,9 +80,13 @@ public class GameManager : MonoBehaviour
     public MxId? currentBetMechanic;
     public uint? faNfaBetInstanceId;
 
+    public int ResultDelay;
+
     public bool IsLoggedIn;
 
     private bool hasFirstTurn;
+
+    public Hand? LastSelectedHand;
 
     /// <summary>
     /// Temp hardcoded username
@@ -130,14 +134,6 @@ public class GameManager : MonoBehaviour
             Debug.Log("Sign In");
             await fbManager.Client.Auth.SignInWithEmailAndPassword(UserEmail, UserPassword);
         }
-        // else
-        // {
-        //     await UserStateChangedHandler(fbManager.Client.Auth.UserIsSet);
-        // }
-
-        // await InitGamePrice();
-        // InitBalances();
-        // await UserStateChangedHandler(fbManager.Client.Auth.UserIsSet);
     }
 
     // Update is called once per frame
@@ -155,6 +151,7 @@ public class GameManager : MonoBehaviour
         CurrentRoundResult = new();
         GameResult = GameResult.Undefined;
         IsLoggedIn = false;
+        LastSelectedHand = null;
     }
 
     /// <summary>
@@ -163,8 +160,6 @@ public class GameManager : MonoBehaviour
     /// <param name="screen"></param>
     public void SetScreen(Screens screen)
     {
-        // if (screen == CurrentScreen) return;
-
         switch (screen)
         {
             case Screens.Start:
@@ -222,8 +217,7 @@ public class GameManager : MonoBehaviour
                 CanvasResult.gameObject.SetActive(true);
                 break;
             default:
-                Debug.Log("Not implemented");
-                break;
+                throw new System.Exception($"Unknown Screen: {screen}");
         }
 
     }
@@ -233,6 +227,7 @@ public class GameManager : MonoBehaviour
         // When we returns from game result screeg, we just going to stant screen
         CurrentScreen = Screens.Start;
         CurrentRoundResult.Clear();
+        LastSelectedHand = null;
     }
 
     public void OnClickNextRound()
@@ -275,12 +270,17 @@ public class GameManager : MonoBehaviour
     async Task SetSelectedHand(Hand hand)
     {
         hasFirstTurn = true;
+
+        LastSelectedHand = hand;
         // going to round screen
         CurrentScreen = Screens.Round;
         // send command to the FinalBiome
-        var results = await MakeTurn();
-        // delay showing results
-        await Task.Delay(3_000);
+        var makeTurn = MakeTurn();
+        // but delay showing results
+        var delayResult = Task.Delay(ResultDelay);
+        await Task.WhenAll(makeTurn, delayResult);
+        var results = await makeTurn;
+
         CurrentRoundResult = results;
        
         // go to the round result screen or to the game result screen
@@ -448,6 +448,7 @@ public class GameManager : MonoBehaviour
             var res = await fbManager.Client.Mx.ExecBuyNfa(FbNfaBetClassId, 0);
             faNfaBetInstanceId = res.Result.InstanceId;
             CurrentRoundResult.Clear();
+            LastSelectedHand = null;
         }
     }
 
