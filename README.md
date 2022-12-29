@@ -2,7 +2,7 @@
 
 Here is a game that runs on the [FinalBiome Network](https://github.com/finalbiome/finalbiome-node) with the Unity game engine, uses the Unity Package [finalbiome-unity](https://github.com/finalbiome/finalbiome-unity) to interact with the network.
 
-![Splash Screen](./docs/splash.png)
+![Splash Screen](./docs/showcase.gif)
 
 ## Usage
 It requires a locally running FinalBiome test node with preset game for it to work.
