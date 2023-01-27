@@ -131,8 +131,8 @@ public class GameManager : MonoBehaviour
         // sign in with hardcoded credentials
         if (!await fbManager.Client.Auth.IsLoggedIn())
         {
-            Debug.Log("Sign In");
-            await fbManager.Client.Auth.SignInWithEmailAndPassword(UserEmail, UserPassword);
+            Debug.Log("Sign in as anonym");
+            await fbManager.Client.Auth.SignInAsAnonym();
         }
     }
 
@@ -340,8 +340,7 @@ public class GameManager : MonoBehaviour
 
         if (loggedIn)
         {
-            PlayerName = fbManager.Client.Auth.UserInfo.DisplayName ?? fbManager.Client.Auth.UserInfo.Email;
-        Debug.Log($"PlayerName: {PlayerName}");
+            PlayerName = fbManager.Client.Auth.UserInfo.DisplayName ?? fbManager.Client.Auth.UserInfo.Email ?? FinalBiome.Api.Utils.AddressUtils.GetAddressFrom(fbManager.Client.Auth.UserAddress.Bytes);
 
             await InitGamePrice();
             InitBalances();
@@ -353,7 +352,6 @@ public class GameManager : MonoBehaviour
             }
         }
         IsLoggedIn = loggedIn;
-        await Task.Yield();
     }
 
     /// <summary>

@@ -4471,7 +4471,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 97, y: -448}
-  m_SizeDelta: {x: 668, y: 62}
+  m_SizeDelta: {x: 700, y: 62}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1454231739
 MonoBehaviour:
@@ -4495,7 +4495,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Your name:
 
-    5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY'
+    5EZRHWR9ozF1tiwFQe8KQKJYk21hFxwdgkWTwSVWEfAbYZz8'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1b19a1adfdbea4886975ec8c132fdefd, type: 2}
   m_sharedMaterial: {fileID: -7537556410659885214, guid: 1b19a1adfdbea4886975ec8c132fdefd, type: 2}
