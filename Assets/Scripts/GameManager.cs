@@ -88,15 +88,6 @@ public class GameManager : MonoBehaviour
 
     public Hand? LastSelectedHand;
 
-    /// <summary>
-    /// Temp hardcoded username
-    /// </summary>
-    public string UserEmail;
-    /// <summary>
-    /// Temp hardcoded password
-    /// </summary>
-    public string UserPassword;
-
     internal void Awake()
     {
         if (Instance == null)

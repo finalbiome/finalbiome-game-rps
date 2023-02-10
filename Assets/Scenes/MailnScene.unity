@@ -3676,9 +3676,9 @@ MonoBehaviour:
   CanvasResult: {fileID: 1137478792}
   GameAddress: 5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty
   Endpoint: ws://127.0.0.1:9944
-  FbFaEnergyId: 2
-  FbFaDiamondsId: 3
-  FbNfaBetClassId: 2
+  FbFaEnergyId: 0
+  FbFaDiamondsId: 1
+  FbNfaBetClassId: 0
   ResultDelay: 2300
   IsLoggedIn: 0
   UserEmail: testdave@finalbiome.net

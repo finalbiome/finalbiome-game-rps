@@ -12,3 +12,5 @@ To make a game configuration in the FinalBiome network, you can use the [finalbi
 ```
 finalbiome-impex import --game-spec ./game_spec.json -s //Bob -m //Charlie
 ```
+
+**Tip:** If you restart the test localhost without executing the logout method, you may catch the low balance error. In this case, you should delete the `finalbiome_auth.json` file with saved credentials in the Unity persistent data [directory](https://docs.unity3d.com/ScriptReference/Application-persistentDataPath.html).
