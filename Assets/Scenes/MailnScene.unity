@@ -3681,8 +3681,6 @@ MonoBehaviour:
   FbNfaBetClassId: 0
   ResultDelay: 2300
   IsLoggedIn: 0
-  UserEmail: testdave@finalbiome.net
-  UserPassword: testDave@finalbiome.net
 --- !u!4 &1030690755
 Transform:
   m_ObjectHideFlags: 0
